@@ -1,0 +1,32 @@
+### Вивести товари
+GET http://localhost:3000/api/products
+
+### Вивести товар
+GET http://localhost:3000/api/products/6ac76121597935e264c933cc
+
+### Створити товар
+POST http://localhost:3000/api/products
+Content-Type: application/json
+
+{
+  "name": "Навушники JBL Tune 520BT",
+  "description": "Бездротові навушники",
+  "price": 1599,
+  "category": "Електроніка",
+  "stock": 5
+}
+
+### Видалити товар
+DELETE http://localhost:3000/api/products/6ac7697b8172e536be8fcc38
+
+### Оновити
+PUT http://localhost:3000/api/products/6ac76121597935e264c933cc
+Content-Type: application/json
+
+{
+  "name": "Навушники One Plus Buds 4",
+  "description": "Бездротові навушники",
+  "price": 3199,
+  "category": "Електроніка",
+  "stock": 12
+}
