@@ -7,6 +7,13 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
 
+    sku:{
+        type:String,
+        required:true,
+        trim:true,
+        uppercase:true
+    },
+
     description:{
       type:String,
       trim:true
@@ -28,10 +35,22 @@ const productSchema = new mongoose.Schema({
         type:Number,
         required:true,
         min:0
+    },
+
+    companyId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Company',
+        required:true,
+        immutable:true
     }
 }, {
     timestamps: true
 })
+
+productSchema.index(
+    {companyId: 1, sku:1},
+    {unique:true}
+)
 
 const Product = mongoose.model('Product', productSchema)
 

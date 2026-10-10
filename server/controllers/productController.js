@@ -38,14 +38,16 @@ export async function getProductById(req,res){
 //CREATE
 export async function createProduct(req,res){
     try{
-        const {name,description,price,category,stock} = req.body
+        const {name, sku, description, price, category, stock, companyId} = req.body
 
         const product = await Product.create({
             name,
+            sku,
             description,
             price,
             category,
-            stock
+            stock,
+            companyId
         })
 
         res.status(201).json(product)
@@ -85,7 +87,7 @@ export async function updateProduct(req,res){
 //DELETE
 export async function deleteProduct(req,res){
     try{
-        const product = await Product.findByIdAndDelete(req.params.id)
+        const product = await Product.findBy``IdAndDelete(req.params.id)
 
         if(!product){
             return res.status(404).json({
