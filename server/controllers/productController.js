@@ -87,7 +87,7 @@ export async function updateProduct(req,res){
 //DELETE
 export async function deleteProduct(req,res){
     try{
-        const product = await Product.findBy``IdAndDelete(req.params.id)
+        const product = await Product.findByIdAndDelete(req.params.id)
 
         if(!product){
             return res.status(404).json({
