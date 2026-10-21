@@ -1,4 +1,5 @@
 import './Cta.css'
+import {Link} from 'react-router-dom'
 
 function Cta() {
     return (
@@ -10,12 +11,9 @@ function Cta() {
                         Увійдіть до системи та перейдіть до свого
                         робочого простору.
                     </p>
-                    <button
-                        type="button"
-                        className="cta-button"
-                    >
+                    <Link className="cta-button" to="/workspace">
                         Увійти до системи
-                    </button>
+                    </Link>
                 </div>
             </div>
         </section>

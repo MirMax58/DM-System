@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import {Link} from 'react-router-dom'
 import logo from '../../assets/DM-System_cube_logo_transparent.png'
 import './Header.css'
 
@@ -36,9 +37,9 @@ function Header() {
                     <a href="#roles">Ролі</a>
                 </nav>
 
-                <a className="login-button" href="#cta">
+                <Link className="login-button" to="/workspace">
                     Увійти
-                </a>
+                </Link>
 
                 <button
                     type="button"
@@ -59,13 +60,13 @@ function Header() {
                 <a href="#workflow" onClick={closeMenu}>Як працює</a>
                 <a href="#roles" onClick={closeMenu}>Ролі</a>
 
-                <a
+                <Link
                     className="mobile-login"
-                    href="#cta"
+                    to="/workspace"
                     onClick={closeMenu}
                 >
                     Увійти до системи
-                </a>
+                </Link>
             </nav>
         </header>
     )
