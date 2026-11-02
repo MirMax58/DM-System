@@ -1,17 +1,15 @@
-//Users
+//створюємо масиви
 export const users = [];
-//Products
 export const products = [];
 
-let userIdCounter = 1;
-let productIdCounter = 1;
+//лічильник
+let usersCounter = 1;
+let productsCounter = 1;
 
-//Функція для отримання наступного ID користувача
+//функції для повертання ID у вигляді рядка
 export function getNextUserId(){
-    return String(userIdCounter++);
+    return String(usersCounter++);
 }
-
-//Функція для отримання наступного ID товару
 export function getNextProductId(){
-    return String(productIdCounter++);
+    return String(productsCounter++);
 }
