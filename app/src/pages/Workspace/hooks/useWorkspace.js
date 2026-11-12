@@ -1,90 +1,90 @@
 import { useState } from 'react'
+import { useMutation, useQuery } from '@apollo/client'
+import { useAuth } from '../../../auth/AuthContext.jsx'
 import {
-  INITIAL_ORDERS,
-  INITIAL_PRODUCTS,
-  INITIAL_USERS,
-  ORDERS_STORAGE_KEY,
-  PRODUCTS_STORAGE_KEY,
-  SECTION_CONTENT,
-  USERS_STORAGE_KEY,
-  navigationItems,
-} from '../constants/workspace.constants.js'
-import useLocalStorageState from './useLocalStorageState.js'
+  COMPANY_QUERY,
+  INVITATIONS_QUERY,
+  ORDERS_QUERY,
+  PRODUCTS_QUERY,
+  UPDATE_COMPANY_MUTATION,
+  USERS_QUERY,
+} from '../../../graphql/operations.js'
+import { SECTION_CONTENT, navigationItems } from '../constants/workspace.constants.js'
 import useOrders from './useOrders.js'
 import useProducts from './useProducts.js'
 import useUsers from './useUsers.js'
 
 export default function useWorkspace() {
+  const { user, logout } = useAuth()
+  const role = user?.role || 'DROPSHIPPER'
   const [activeSection, setActiveSection] = useState('overview')
-  const [role, setRole] = useState('ADMIN')
   const [feedback, setFeedback] = useState(null)
 
-  const [products, setProducts] = useLocalStorageState(
-    PRODUCTS_STORAGE_KEY,
-    INITIAL_PRODUCTS,
-  )
-  const [orders, setOrders] = useLocalStorageState(
-    ORDERS_STORAGE_KEY,
-    INITIAL_ORDERS,
-  )
-  const [users, setUsers] = useLocalStorageState(USERS_STORAGE_KEY, INITIAL_USERS)
+  const productsQuery = useQuery(PRODUCTS_QUERY, { fetchPolicy: 'cache-and-network' })
+  const ordersQuery = useQuery(ORDERS_QUERY, { fetchPolicy: 'cache-and-network' })
+  const companyQuery = useQuery(COMPANY_QUERY, { fetchPolicy: 'cache-and-network' })
+  const usersQuery = useQuery(USERS_QUERY, { skip: role !== 'ADMIN', fetchPolicy: 'cache-and-network' })
+  const invitationsQuery = useQuery(INVITATIONS_QUERY, { skip: role !== 'ADMIN', fetchPolicy: 'cache-and-network' })
+  const [updateCompany, { loading: savingCompany }] = useMutation(UPDATE_COMPANY_MUTATION)
+  const products = productsQuery.data?.products || []
+  const orders = ordersQuery.data?.orders || []
+  const users = usersQuery.data?.users || []
+  const invitations = invitationsQuery.data?.invitations || []
+  const company = companyQuery.data?.company || user?.company || null
+  const [companyName, setCompanyName] = useState(company?.name || '')
 
   const productManager = useProducts({
     products,
-    setProducts,
-    orders,
+    refetchProducts: productsQuery.refetch,
     setActiveSection,
     setFeedback,
   })
-
   const orderManager = useOrders({
     orders,
-    setOrders,
     products,
-    setProducts,
-    users,
+    user,
     role,
+    refetchOrders: ordersQuery.refetch,
+    refetchProducts: productsQuery.refetch,
     setActiveSection,
     setFeedback,
   })
-
   const userManager = useUsers({
     users,
-    setUsers,
-    orders,
-    setOrders,
+    invitations,
+    currentUser: user,
+    refetchUsers: usersQuery.refetch,
+    refetchInvitations: invitationsQuery.refetch,
     setActiveSection,
     setFeedback,
   })
 
-  const visibleNavigation = navigationItems.filter(
-    (item) => !item.adminOnly || role === 'ADMIN',
-  )
-
-  const currentSection = SECTION_CONTENT[activeSection]
-
-  function handleRoleChange(event) {
-    const nextRole = event.target.value
-
-    setRole(nextRole)
-    productManager.hideProductForm()
-    orderManager.hideOrderForm()
-    userManager.hideUserForm()
-    setFeedback(null)
-
-    if (nextRole !== 'ADMIN' && activeSection === 'users') {
-      setActiveSection('orders')
-    }
-  }
+  const visibleNavigation = navigationItems.filter((item) => !item.adminOnly || role === 'ADMIN')
+  const currentSection = SECTION_CONTENT[activeSection] || SECTION_CONTENT.overview
 
   function handleSectionChange(sectionId) {
+    if (['users', 'company'].includes(sectionId) && role !== 'ADMIN') return
     setActiveSection(sectionId)
     setFeedback(null)
   }
 
-  function openProducts() {
-    setActiveSection('products')
-    setFeedback(null)
+  function openProducts() { setActiveSection('products'); setFeedback(null) }
+
+  async function handleCompanySubmit(event) {
+    event.preventDefault()
+    const name = companyName.trim()
+    if (name.length < 2 || name.length > 100) {
+      setFeedback({ type: 'error', text: 'Назва компанії має містити від 2 до 100 символів.' })
+      return
+    }
+    try {
+      const { data } = await updateCompany({ variables: { name } })
+      setCompanyName(data.updateCompany.name)
+      await companyQuery.refetch()
+      setFeedback({ type: 'success', text: 'Інформацію про компанію оновлено.' })
+    } catch (error) {
+      setFeedback({ type: 'error', text: error.message || 'Не вдалося оновити компанію.' })
+    }
   }
 
   const overview = {
@@ -97,19 +97,14 @@ export default function useWorkspace() {
     onAddProduct: productManager.openNewProductForm,
   }
 
+  const loading = productsQuery.loading || ordersQuery.loading || companyQuery.loading || (role === 'ADMIN' && (usersQuery.loading || invitationsQuery.loading))
+  const error = productsQuery.error || ordersQuery.error || companyQuery.error || usersQuery.error || invitationsQuery.error
+
   return {
-    activeSection,
-    setActiveSection,
-    role,
-    feedback,
-    visibleNavigation,
-    currentSection,
-    handleRoleChange,
-    handleSectionChange,
-    openProducts,
-    overview,
-    products: productManager,
-    orders: orderManager,
-    users: userManager,
+    activeSection, role, user, company, logout, feedback, setFeedback,
+    visibleNavigation, currentSection, handleSectionChange, overview,
+    products: productManager, orders: orderManager, users: userManager,
+    loading, error,
+    companySettings: { company, companyName, setCompanyName, handleCompanySubmit, savingCompany, feedback },
   }
 }

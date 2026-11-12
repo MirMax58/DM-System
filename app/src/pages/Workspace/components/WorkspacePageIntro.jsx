@@ -1,20 +1,7 @@
-import {
-  Eyebrow,
-  PageDescription,
-  PageIntro,
-  PageTitle,
-  IntroText,
-} from '../styles/layout.styles.js'
+import { Eyebrow, PageDescription, PageIntro, PageTitle, IntroText } from '../styles/layout.styles.js'
 import { PrimaryButton } from '../styles/common.styles.js'
 
-export default function WorkspacePageIntro({
-  section,
-  activeSection,
-  role,
-  onAddProduct,
-  onNewOrder,
-  onAddUser,
-}) {
+export default function WorkspacePageIntro({ section, activeSection, role, onAddProduct, onNewOrder, onAddUser }) {
   return (
     <PageIntro>
       <IntroText>
@@ -22,24 +9,9 @@ export default function WorkspacePageIntro({
         <PageTitle>{section.title}</PageTitle>
         <PageDescription>{section.description}</PageDescription>
       </IntroText>
-
-      {activeSection === 'products' && role === 'ADMIN' && (
-        <PrimaryButton type="button" onClick={onAddProduct}>
-          <span aria-hidden="true">➕</span> Додати товар
-        </PrimaryButton>
-      )}
-
-      {activeSection === 'orders' && role === 'DROPSHIPPER' && (
-        <PrimaryButton type="button" onClick={onNewOrder}>
-          ➕ Нове замовлення
-        </PrimaryButton>
-      )}
-
-      {activeSection === 'users' && role === 'ADMIN' && (
-        <PrimaryButton type="button" onClick={onAddUser}>
-          ➕ Додати користувача
-        </PrimaryButton>
-      )}
+      {activeSection === 'products' && role === 'ADMIN' && <PrimaryButton type="button" onClick={onAddProduct}>＋ Додати товар</PrimaryButton>}
+      {activeSection === 'orders' && role === 'DROPSHIPPER' && <PrimaryButton type="button" onClick={onNewOrder}>＋ Нове замовлення</PrimaryButton>}
+      {activeSection === 'users' && role === 'ADMIN' && <PrimaryButton type="button" onClick={onAddUser}>＋ Створити запрошення</PrimaryButton>}
     </PageIntro>
   )
 }
