@@ -1,20 +1,19 @@
 {
-  "name": "server-graphql",
-  "version": "1.0.0",
-  "description": "",
+  "name": "dm-system-graphql-api",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@apollo/server": "^5.5.1",
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
     "graphql": "^16.14.2",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.19.1"
   }
 }

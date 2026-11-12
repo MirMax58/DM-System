@@ -3,3 +3,8 @@
 .expo/
 dist/
 **/.env
+
+.env
+.env.*
+!.env.example
+node_modules/

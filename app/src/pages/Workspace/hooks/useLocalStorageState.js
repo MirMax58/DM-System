@@ -18,7 +18,6 @@ export default function useLocalStorageState(storageKey, initialValue) {
     try {
       localStorage.setItem(storageKey, JSON.stringify(value))
     } catch {
-      // Застосунок продовжує працювати, навіть якщо localStorage недоступний.
     }
   }, [storageKey, value])
 
