@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { filterProducts, validateProduct } from '@dm-system/core'
 import { useMutation } from '@apollo/client'
 import { CREATE_PRODUCT_MUTATION, DELETE_PRODUCT_MUTATION, UPDATE_PRODUCT_MUTATION } from '../../../graphql/operations.js'
 import { EMPTY_PRODUCT_FORM, PRODUCT_CATEGORIES } from '../constants/workspace.constants.js'
@@ -15,8 +16,7 @@ export default function useProducts({ products, refetchProducts, setActiveSectio
   const categories = useMemo(() => [...new Set([...PRODUCT_CATEGORIES, ...products.map((p) => p.category).filter(Boolean)])].sort(), [products])
   const totalStock = products.reduce((sum, product) => sum + Number(product.stock || 0), 0)
   const lowStockCount = products.filter((product) => Number(product.stock) < 10).length
-  const query = search.trim().toLowerCase()
-  const filteredProducts = products.filter((p) => [p.name, p.sku, p.description].some((v) => String(v || '').toLowerCase().includes(query)) && (categoryFilter === 'all' || p.category === categoryFilter))
+  const filteredProducts = filterProducts(products, search, categoryFilter)
 
   function resetProductForm() { setProductForm({ ...EMPTY_PRODUCT_FORM }); setEditingProductId(null); setShowProductForm(false) }
   function openNewProductForm() { setActiveSection('products'); setProductForm({ ...EMPTY_PRODUCT_FORM }); setEditingProductId(null); setFeedback(null); setShowProductForm(true) }
@@ -29,10 +29,11 @@ export default function useProducts({ products, refetchProducts, setActiveSectio
   async function handleProductSubmit(event) {
     event.preventDefault()
     const input = { name: productForm.name.trim(), sku: productForm.sku.trim().toUpperCase(), category: productForm.category, description: productForm.description.trim(), price: Number(productForm.price), stock: Number(productForm.stock) }
-    if (!input.name || !input.sku || !input.category) return setFeedback({ type: 'error', text: 'Заповни назву товару, артикул і категорію.' })
-    if (productForm.price === '' || !Number.isFinite(input.price) || input.price < 0) return setFeedback({ type: 'error', text: 'Ціна має бути невід’ємним числом.' })
-    if (productForm.stock === '' || !Number.isInteger(input.stock) || input.stock < 0) return setFeedback({ type: 'error', text: 'Залишок має бути цілим невід’ємним числом.' })
-    if (products.some((p) => p.sku.toLowerCase() === input.sku.toLowerCase() && p.id !== editingProductId)) return setFeedback({ type: 'error', text: 'Товар з таким артикулом уже є в каталозі.' })
+    if (productForm.price === '' || productForm.stock === '') {
+      return setFeedback({ type: 'error', text: 'Заповни ціну та залишок товару.' })
+    }
+    const validation = validateProduct(input, { products, editingProductId })
+    if (!validation.valid) return setFeedback({ type: 'error', text: validation.error })
     const wasEditing = Boolean(editingProductId)
     try {
       if (wasEditing) await updateProduct({ variables: { id: editingProductId, input } })

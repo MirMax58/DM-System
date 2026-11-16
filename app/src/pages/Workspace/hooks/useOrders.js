@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
+import { ALLOWED_ORDER_TRANSITIONS, canChangeOrderStatus, filterOrders, validateOrder } from '@dm-system/core'
 import { useMutation } from '@apollo/client'
 import { CREATE_ORDER_MUTATION, DELETE_ORDER_MUTATION, UPDATE_ORDER_STATUS_MUTATION } from '../../../graphql/operations.js'
-import { ALLOWED_ORDER_TRANSITIONS, ORDER_STATUSES } from '../constants/workspace.constants.js'
+import { ORDER_STATUSES } from '../constants/workspace.constants.js'
 import { getOrderStatusLabel } from '../utils/workspace.utils.js'
 
 const makeEmptyForm = (products) => ({
@@ -19,10 +20,7 @@ export default function useOrders({ orders, products, user, role, refetchOrders,
   const [updateOrderStatus] = useMutation(UPDATE_ORDER_STATUS_MUTATION)
   const [deleteOrder] = useMutation(DELETE_ORDER_MUTATION)
   const visibleOrdersForRole = orders.filter((o) => role === 'ADMIN' || o.createdBy === user?.id)
-  const query = orderSearch.trim().toLowerCase()
-  const visibleOrders = visibleOrdersForRole
-    .filter((o) => orderStatusFilter === 'all' || o.status === orderStatusFilter)
-    .filter((o) => !query || [o.id, o.orderNumber, o.customerName, o.customerPhone, ...(o.items || []).flatMap((i) => [i.productName, i.sku])].some((v) => String(v || '').toLowerCase().includes(query)))
+  const visibleOrders = filterOrders(visibleOrdersForRole, orderSearch, orderStatusFilter)
   const orderTotals = useMemo(() => ({
     total: visibleOrdersForRole.length,
     new: visibleOrdersForRole.filter((o) => o.status === 'NEW').length,
@@ -66,17 +64,16 @@ export default function useOrders({ orders, products, user, role, refetchOrders,
     event.preventDefault()
     const customerName = orderForm.customerName.trim()
     const customerPhone = orderForm.customerPhone.trim()
-    if (!customerName || !customerPhone) return setFeedback({ type: 'error', text: 'Заповни ім’я та телефон клієнта.' })
-    if (!orderForm.items.length) return setFeedback({ type: 'error', text: 'Додай хоча б один товар до замовлення.' })
-    const items = []
-    for (const row of orderForm.items) {
-      const product = products.find((p) => p.id === row.productId)
-      const quantity = Number(row.quantity)
-      if (!product) return setFeedback({ type: 'error', text: 'Обери товар для кожної позиції.' })
-      if (!Number.isInteger(quantity) || quantity < 1) return setFeedback({ type: 'error', text: 'Кількість має бути цілим числом від 1.' })
-      if (quantity > Number(product.stock)) return setFeedback({ type: 'error', text: `Недостатньо залишку товару «${product.name}».` })
-      items.push({ productId: product.id, quantity })
-    }
+    const validation = validateOrder({
+      customerName,
+      customerPhone,
+      items: orderForm.items.map((row) => ({
+        productId: row.productId,
+        quantity: Number(row.quantity),
+      })),
+    }, products)
+    if (!validation.valid) return setFeedback({ type: 'error', text: validation.error })
+    const items = validation.items
     try {
       const { data } = await createOrder({ variables: { input: { customerName, customerPhone, items } } })
       await Promise.all([refetchOrders(), refetchProducts()])
@@ -90,7 +87,7 @@ export default function useOrders({ orders, products, user, role, refetchOrders,
   async function handleOrderStatusChange(orderId, nextStatus) {
     if (role !== 'ADMIN') return
     const order = orders.find((o) => o.id === orderId)
-    if (!order || !ALLOWED_ORDER_TRANSITIONS[order.status]?.includes(nextStatus)) return
+    if (!order || !canChangeOrderStatus(order.status, nextStatus)) return
     try {
       await updateOrderStatus({ variables: { id: orderId, status: nextStatus } })
       await Promise.all([refetchOrders(), refetchProducts()])

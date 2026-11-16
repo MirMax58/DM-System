@@ -1,0 +1,17 @@
+{
+  "name": "dm-system-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@dm-system/core": "*"
+  },
+  "devDependencies": {
+    "electron": "latest"
+  }
+}

@@ -120,3 +120,49 @@ npm run dev
 ## Межі цієї поставки
 
 Це інтегрований вебклієнт і GraphQL backend для зафіксованих основних сценаріїв DM-System. Мобільний клієнт React Native ще не входить до цього архіву: він зможе використовувати той самий API, токен і модель ролей без створення другої системи даних.
+
+
+## Лабораторна робота № 7–8: спільне ядро та monorepo
+
+У корені репозиторію налаштовано npm workspaces:
+- `app/packages/core` — платформонезалежні правила DM-System: валідація товарів і замовлень, переходи статусів, фільтрація та форматування;
+- `app` — React/Vite Web-клієнт;
+- `app/desktop` — Electron-клієнт і файловий адаптер для локальних налаштувань.
+
+Web та Electron використовують один `createStorageService()` із Core через платформні адаптери. Бізнес-дані каталогу, замовлень і користувачів залишаються на GraphQL/MongoDB; локальні адаптери зберігають налаштування робочого простору, щоб не створювати другу, неузгоджену копію серверних даних.
+
+### Встановлення та перевірки
+
+З кореня репозиторію:
+```bash
+npm install
+npm test
+npm run build:web
+```
+
+Окремі тести:
+```bash
+npm run test:core
+npm run test:web
+npm run test:desktop
+```
+
+Запуск:
+```bash
+npm run start:web
+npm run start:desktop
+```
+
+GraphQL API запускається окремо:
+```bash
+cd server-graphql
+npm install
+npm run dev
+```
+
+### Платформна архітектура
+
+- Core не імпортує `window`, `localStorage`, `document` чи Electron.
+- Web адаптер використовує `localStorage`.
+- Electron адаптер викликає лише дозволені методи preload bridge; файловий доступ реалізовано в main process.
+- Electron renderer працює з `contextIsolation: true`, `nodeIntegration: false` і sandbox.

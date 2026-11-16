@@ -11,9 +11,9 @@ function formatDate(value) {
 }
 
 export default function UsersSection({
-  users, invitations, filteredUsers, userSearch, setUserSearch, userRoleFilter,
-  setUserRoleFilter, feedback, showUserForm, expiresInDays, setExpiresInDays,
-  createdInvitationCode, creatingInvitation, openNewUserForm, handleUserSubmit,
+                                       invitations, filteredUsers, userSearch, setUserSearch, userRoleFilter,
+                                       setUserRoleFilter, feedback, showUserForm, expiresInDays, setExpiresInDays,
+                                       createdInvitationCode, creatingInvitation, handleUserSubmit,
   handleUserStatusToggle, handleRevokeInvitation, copyInvitationCode, resetUserForm,
 }) {
   return (

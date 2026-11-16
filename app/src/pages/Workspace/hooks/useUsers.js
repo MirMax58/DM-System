@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
+import { filterUsers } from '@dm-system/core'
 import { useMutation } from '@apollo/client'
 import { CREATE_INVITATION_MUTATION, REVOKE_INVITATION_MUTATION, UPDATE_USER_STATUS_MUTATION } from '../../../graphql/operations.js'
 
@@ -11,7 +12,7 @@ export default function useUsers({ users, invitations, currentUser, refetchUsers
   const [createInvitation, { loading: creatingInvitation }] = useMutation(CREATE_INVITATION_MUTATION)
   const [revokeInvitation] = useMutation(REVOKE_INVITATION_MUTATION)
   const [updateUserStatus] = useMutation(UPDATE_USER_STATUS_MUTATION)
-  const filteredUsers = useMemo(() => users.filter((u) => userRoleFilter === 'all' || u.role === userRoleFilter).filter((u) => { const q = userSearch.trim().toLowerCase(); return !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) }), [users, userRoleFilter, userSearch])
+  const filteredUsers = filterUsers(users, userSearch, userRoleFilter)
 
   function openNewUserForm() { setActiveSection('users'); setExpiresInDays('7'); setCreatedInvitationCode(''); setShowUserForm(true); setFeedback(null) }
   async function handleUserSubmit(event) {

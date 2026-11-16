@@ -4,7 +4,6 @@ export const ORDER_STATUSES = {
   COMPLETED: { label: 'Виконане', background: '#e5f8ed', color: '#237b4d' },
   CANCELLED: { label: 'Скасоване', background: '#ffebee', color: '#b7354d' },
 }
-export const ALLOWED_ORDER_TRANSITIONS = { NEW: ['PROCESSING', 'CANCELLED'], PROCESSING: ['COMPLETED', 'CANCELLED'], COMPLETED: [], CANCELLED: [] }
 export const PRODUCT_CATEGORIES = ['Електроніка', 'Аксесуари', 'Для дому', 'Одяг']
 export const EMPTY_PRODUCT_FORM = { name: '', sku: '', category: PRODUCT_CATEGORIES[0], price: '', stock: '', description: '' }
 export const EMPTY_ORDER_FORM = { customerName: '', customerPhone: '', productId: '', quantity: '1' }

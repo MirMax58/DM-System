@@ -1,10 +1,22 @@
-.idea/
+# Dependencies and build output
+node_modules/
 **/node_modules/
-.expo/
 dist/
-**/.env
+**/dist/
+out/
+coverage/
+.expo/
+.vite/
 
+# Local environment and secrets
 .env
 .env.*
 !.env.example
-node_modules/
+**/.env
+**/.env.*
+!**/.env.example
+
+# IDE / OS
+.idea/
+.DS_Store
+Thumbs.db

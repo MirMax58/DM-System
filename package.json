@@ -1,0 +1,25 @@
+{
+  "name": "dm-system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "app/packages/*",
+    "app",
+    "app/desktop"
+  ],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "test:core": "npm test --workspace @dm-system/core",
+    "test:web": "npm test --workspace dm-system-web",
+    "test:desktop": "npm test --workspace dm-system-desktop",
+    "start:web": "npm run dev --workspace dm-system-web -- --host 127.0.0.1",
+    "start:desktop": "concurrently -k \"npm run dev --workspace dm-system-web -- --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && npm run start --workspace dm-system-desktop -- --dev\"",
+    "build:web": "npm run build --workspace dm-system-web",
+    "lint": "npm run lint --workspace dm-system-web"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7",
+    "wait-on": "^9.5.1"
+  }
+}

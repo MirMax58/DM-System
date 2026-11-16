@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { validateCompanyName } from '@dm-system/core'
+import useLocalStorageState from './useLocalStorageState.js'
 import { useMutation, useQuery } from '@apollo/client'
 import { useAuth } from '../../../auth/AuthContext.jsx'
 import {
@@ -17,8 +19,14 @@ import useUsers from './useUsers.js'
 export default function useWorkspace() {
   const { user, logout } = useAuth()
   const role = user?.role || 'DROPSHIPPER'
-  const [activeSection, setActiveSection] = useState('overview')
+  const [activeSection, setActiveSection] = useLocalStorageState('workspace:active-section', 'overview')
   const [feedback, setFeedback] = useState(null)
+
+  useEffect(() => {
+    if (role !== 'ADMIN' && ['users', 'company'].includes(activeSection)) {
+      setActiveSection('overview')
+    }
+  }, [role, activeSection, setActiveSection])
 
   const productsQuery = useQuery(PRODUCTS_QUERY, { fetchPolicy: 'cache-and-network' })
   const ordersQuery = useQuery(ORDERS_QUERY, { fetchPolicy: 'cache-and-network' })
@@ -73,8 +81,9 @@ export default function useWorkspace() {
   async function handleCompanySubmit(event) {
     event.preventDefault()
     const name = companyName.trim()
-    if (name.length < 2 || name.length > 100) {
-      setFeedback({ type: 'error', text: 'Назва компанії має містити від 2 до 100 символів.' })
+    const validation = validateCompanyName(name)
+    if (!validation.valid) {
+      setFeedback({ type: 'error', text: validation.error })
       return
     }
     try {

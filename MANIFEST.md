@@ -1,60 +1,23 @@
-# Перелік файлів оновлення
+# DM-System — структура проєкту після підготовки ЛР 7–8
 
-## Додати
+## Корінь
+- `package.json`, `package-lock.json` — npm monorepo та workspaces.
+- `README.md` — загальна документація та команди запуску.
+- `labs/lab_7-8/README.md` — архітектура та кроки лабораторної.
+- `server-graphql/` — основний GraphQL API.
+- `server/` — попередній REST-сервер (залишений як окремий навчальний компонент).
+- `mobile/` — Expo-клієнт.
+- `docs/`, `labs/`, `practic/` — навчальні матеріали.
 
-### Backend (`server-graphql/`)
-- `.env.example`
-- `config/database.js`
-- `models/Company.js`
-- `models/User.js`
-- `models/Invitation.js`
-- `models/Product.js`
-- `models/Order.js`
-- `utils/errors.js`
-- `utils/security.js`
+## Monorepo
+- `app/packages/core/` — `@dm-system/core`, спільна бізнес-логіка й unit-тести.
+- `app/` — React/Vite Web-клієнт і Web localStorage adapter.
+- `app/desktop/` — Electron main process, preload bridge, файловий адаптер та IPC-тести.
 
-### Frontend (`app/src/`)
-- `auth/AuthContext.jsx`
-- `components/ProtectedRoute.jsx`
-- `graphql/operations.js`
-- `lib/apollo.js`
-- `pages/Auth/AuthPage.jsx`
-- `pages/Auth/AuthPage.css`
-- `pages/Workspace/components/CompanySection.jsx`
+## Прибрані дублікати
+Видалені вкладені копії `app/app`, `app/mobile`, `app/server`, `app/server-graphql`, `app/electron`, `app/docs`, `app/practic` та `app/labs`. Оригінальні `mobile/`, `server/`, `server-graphql/`, `docs/`, `practic/` і `labs/` у корені збережені. Методичні матеріали ЛР 7–8 перенесені до `labs/lab_7-8/`.
 
-## Замінити
-
-### Backend
-- `server-graphql/package.json`
-- `server-graphql/index.js`
-- `server-graphql/schema.js`
-- `server-graphql/resolvers.js`
-- `server-graphql/auth.js`
-- `server-graphql/data.js` (позначено як застарілий модуль, активний API його не використовує)
-
-### Frontend
-- `app/package.json`
-- `app/index.html`
-- `app/index.html`
-- `app/src/main.jsx`
-- `app/src/App.jsx`
-- `app/src/pages/Workspace/Workspace.jsx`
-- `app/src/pages/Workspace/components/OrdersSection.jsx`
-- `app/src/pages/Workspace/components/UsersSection.jsx`
-- `app/src/pages/Workspace/components/WorkspacePageIntro.jsx`
-- `app/src/pages/Workspace/components/WorkspaceTopbar.jsx`
-- `app/src/pages/Workspace/constants/workspace.constants.js`
-- `app/src/pages/Workspace/hooks/useWorkspace.js`
-- `app/src/pages/Workspace/hooks/useProducts.js`
-- `app/src/pages/Workspace/hooks/useOrders.js`
-- `app/src/pages/Workspace/hooks/useUsers.js`
-- `app/src/pages/Workspace/styles/users.styles.js`
-
-## Не змінювати
-
-- Публічні компоненти головної сторінки.
-- Наявні стилі каталогу, замовлень, загального layout та sidebar.
-- Наявні компоненти `ProductsSection`, `OverviewSection`, `WorkspaceSidebar` та утиліти.
-- Старий REST-сервер `server/` — він більше не використовується вебклієнтом як основний API.
-
-Після копіювання запусти `npm install` окремо в `server-graphql/` та `app/`, щоб оновити lock-файли відповідно до нових залежностей.
+## Безпека
+- `.env` та локальні секрети не входять до архіву.
+- У репозиторії залишаються лише `.env.example`.
+- `node_modules`, `dist`, кеші та IDE-папки не включаються до архіву.
