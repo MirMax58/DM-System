@@ -167,7 +167,6 @@ npm run dev
 - Electron адаптер викликає лише дозволені методи preload bridge; файловий доступ реалізовано в main process.
 - Electron renderer працює з `contextIsolation: true`, `nodeIntegration: false` і sandbox.
 
-
 ## Технологічний стек і компетентності
 
 DM-System розробляється як кросплатформний застосунок із веб-, мобільним і десктопним клієнтами. Для кожної платформи використано відповідні інструменти, а спільні частини винесено в окремий пакет.
@@ -276,3 +275,13 @@ GraphQL API є основним API для вебклієнта. Окремий 
 - Лабораторна 5 — мобільний застосунок на React Native.
 - Лабораторна 6 — десктопний застосунок на Electron.
 - [Лабораторні 7–8 — спільне ядро та monorepo](labs/lab_7-8/).
+## Запуск платформ
+
+Перед запуском переконайтеся, що налаштовані `server-graphql/.env` та `mobile/.env` на основі відповідних `.env.example` файлів. Не додавайте `.env` до Git або публічних архівів.
+
+- GraphQL API: з кореня репозиторію `npm run start:api` (або `npm run dev` у `server-graphql`).
+- Web: `npm run start:web`.
+- Desktop: `npm run start:desktop`.
+- Mobile / Expo: `npm run start:mobile`.
+
+Для Web на тому самому комп'ютері Mobile може використовувати `http://localhost:4001/`. Для фізичного телефона в `mobile/.env` вкажіть LAN IPv4-адресу комп'ютера, наприклад `EXPO_PUBLIC_GRAPHQL_URL=http://192.168.1.25:4001/`. Телефон і комп'ютер мають бути в одній мережі. Після зміни `.env` перезапустіть Expo з `npx expo start -c`.

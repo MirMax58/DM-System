@@ -11,8 +11,9 @@
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
-    "@dm-system/core": "*",
     "@apollo/client": "^3.14.1",
+    "@dm-system/core": "*",
+    "expo": "^58.0.25",
     "graphql": "^16.15.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

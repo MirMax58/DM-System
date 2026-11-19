@@ -4,9 +4,11 @@ import {
   Alert, FlatList, KeyboardAvoidingView, Platform,
   ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  SafeAreaProvider,
+} from 'react-native-safe-area-context';
 import { clearToken, getToken, gql, saveToken } from './src/api';
-import Header from './src/components/Header';
 import ProductForm from './src/components/ProductForm';
 import ProductItem from './src/components/ProductItem';
 import OrderItem from './src/components/OrderItem';
@@ -28,7 +30,7 @@ const statuses = { NEW:'Нове', PROCESSING:'В обробці', COMPLETED:'В
 const transitions = { NEW:['PROCESSING','CANCELLED'], PROCESSING:['COMPLETED','CANCELLED'], COMPLETED:[], CANCELLED:[] };
 const categories = ['Електроніка','Аксесуари','Для дому','Одяг'];
 
-export default function App() {
+function AppContent(){
   const [user,setUser] = useState(null);
   const [company,setCompany] = useState(null);
   const [products,setProducts] = useState([]);
@@ -86,7 +88,11 @@ export default function App() {
   async function run(task, success) {
     setBusy(true); setFeedback('');
     try { await task(); if (success) setFeedback(success); }
-    catch(e) { Alert.alert('Помилка',e.message || 'Сталася помилка.'); }
+    catch(e) {
+      const message = e.message || 'Сталася помилка.';
+      setFeedback(message);
+      if (Platform.OS !== 'web') Alert.alert('Помилка', message);
+    }
     finally { setBusy(false); }
   }
   async function authenticate() {
@@ -260,11 +266,19 @@ export default function App() {
           {invitations.map(i=><View key={i.id} style={styles.card}><Text style={styles.itemTitle}>Створено: {date(i.createdAt)}</Text><Text style={styles.muted}>Дійсне до: {date(i.expiresAt)}</Text><Text style={styles.accent}>{i.isUsable?'Активне':i.revokedAt?'Відкликане':'Недійсне'} · {i.usesCount?'Використане':'Не використане'}</Text>{i.isUsable&&<Action title="Відкликати" kind="danger" onPress={()=>revokeInvite(i)}/>}</View>)}
         </View>}
         {tab==='company'&&isAdmin&&<View style={styles.card}><Text style={styles.sectionTitle}>Профіль компанії</Text><Field label="Назва компанії" value={companyName} onChangeText={setCompanyName}/><Action title="Зберегти зміни" onPress={saveCompany}/><Text style={styles.muted}>Власник: {company?.ownerName||'—'}</Text><Text style={styles.muted}>Створено: {date(company?.createdAt)}</Text><Text style={styles.muted}>ID: {company?.id||'—'}</Text></View>}
-        {tab==='profile'&&<View style={styles.card}><Text style={styles.itemTitle}>{user.name}</Text><Text style={styles.muted}>{user.email}</Text><Text style={styles.accent}>{isAdmin?'Адміністратор':'Дропшипер'}</Text><Text style={styles.muted}>Компанія: {company?.name||user.companyName}</Text><Action title="Оновити дані" kind="secondary" onPress={()=>run(loadData,'Дані оновлено.')}/><Action title="Вийти з акаунта" kind="danger" onPress={logout}/></View>}
+        {tab==='profile'&&<View style={styles.card}><Text style={styles.itemTitle}>{user.name}</Text><Text style={styles.muted}>{user.email}</Text><Text style={styles.accent}>{isAdmin?'Адміністратор':'Дропшипер'}</Text><Text style={styles.muted}>Компанія: {company?.name||user.companyName}</Text><Action title="Вийти з акаунта" kind="danger" onPress={logout}/></View>}
         <Action title={refreshing?'Оновлення…':'Оновити дані'} kind="secondary" onPress={refresh} disabled={refreshing}/>
       </ScrollView>
       <View style={styles.bottomNav}>{nav.map(([id,label])=><TouchableOpacity key={id} style={styles.navItem} onPress={()=>{setTab(id);setFeedback('');setEditingProduct(null)}}><Text style={[styles.navLabel,tab===id&&styles.navActive]}>{label}</Text><View style={[styles.navDot,tab===id&&styles.navDotActive]}/></TouchableOpacity>)}</View>
     </SafeAreaView>
+  );
+}
+
+export default function App() {
+  return (
+      <SafeAreaProvider>
+        <AppContent />
+      </SafeAreaProvider>
   );
 }
 

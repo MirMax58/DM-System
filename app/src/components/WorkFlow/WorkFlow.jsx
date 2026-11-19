@@ -1,4 +1,4 @@
-import './Workflow.css'
+import './WorkFlow.css'
 
 function Workflow() {
     return (

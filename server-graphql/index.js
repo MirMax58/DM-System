@@ -12,6 +12,23 @@ const allowedOrigins = (process.env.CLIENT_ORIGINS || 'http://localhost:5173,htt
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+// Local development origins used by Vite, Expo Web and Android/iOS simulators.
+function isAllowedDevelopmentOrigin(origin) {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+
+  try {
+    const url = new URL(origin);
+    const isLocalHost = ['localhost', '127.0.0.1'].includes(url.hostname);
+    const isPrivateLan = /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(url.hostname);
+    return process.env.NODE_ENV !== 'production'
+      && (isLocalHost || isPrivateLan)
+      && ['http:', 'https:'].includes(url.protocol);
+  } catch {
+    return false;
+  }
+}
+
 async function startServer() {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
     throw new Error('JWT_SECRET має бути заданий і містити щонайменше 32 символи. Перевір файл .env.');
@@ -36,7 +53,7 @@ async function startServer() {
     listen: { port, host: '0.0.0.0' },
     cors: {
       origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        if (isAllowedDevelopmentOrigin(origin)) return callback(null, true);
         return callback(new Error('Origin is not allowed by CORS'));
       },
       methods: ['GET', 'POST', 'OPTIONS'],

@@ -16,7 +16,9 @@
     "start:web": "npm run dev --workspace dm-system-web -- --host 127.0.0.1",
     "start:desktop": "concurrently -k \"npm run dev --workspace dm-system-web -- --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && npm run start --workspace dm-system-desktop -- --dev\"",
     "build:web": "npm run build --workspace dm-system-web",
-    "lint": "npm run lint --workspace dm-system-web"
+    "lint": "npm run lint --workspace dm-system-web",
+    "start:api": "npm run dev --prefix server-graphql",
+    "start:mobile": "npm start --prefix mobile"
   },
   "devDependencies": {
     "concurrently": "^10.0.7",

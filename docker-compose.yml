@@ -1,0 +1,46 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: dm-system-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./server-graphql
+      dockerfile: Dockerfile
+    container_name: dm-system-api
+    restart: unless-stopped
+    env_file:
+      - ./server-graphql/.env
+    environment:
+      PORT: 4001
+      MONGODB_URI: mongodb://mongodb:27017/dm-system
+      CLIENT_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+    ports:
+      - "4001:4001"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+      args:
+        VITE_GRAPHQL_URL: http://localhost:4001/
+    container_name: dm-system-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  mongodb_data:
