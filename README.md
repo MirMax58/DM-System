@@ -166,3 +166,113 @@ npm run dev
 - Web адаптер використовує `localStorage`.
 - Electron адаптер викликає лише дозволені методи preload bridge; файловий доступ реалізовано в main process.
 - Electron renderer працює з `contextIsolation: true`, `nodeIntegration: false` і sandbox.
+
+
+## Технологічний стек і компетентності
+
+DM-System розробляється як кросплатформний застосунок із веб-, мобільним і десктопним клієнтами. Для кожної платформи використано відповідні інструменти, а спільні частини винесено в окремий пакет.
+
+### Технологічний стек
+
+| Рівень | Технології | Реалізація в проєкті |
+|---|---|---|
+| Платформи | Web, Mobile, Desktop | Окремі клієнтські середовища для роботи із системою |
+| Web-клієнт | React, Vite, React Router, Styled Components, Apollo Client | Інтерфейс у теці [app](app/) |
+| Mobile-клієнт | React Native, Expo | Мобільний застосунок у теці [mobile](mobile/) |
+| Desktop-клієнт | Electron, Vite | Десктопна оболонка у теці [app/desktop](app/desktop/) |
+| Спільний код | JavaScript, npm workspaces, @dm-system/core | Пакет [app/packages/core](app/packages/core/) |
+| Платформні адаптери | LocalStorage, Electron preload bridge, IPC, File Storage | [Web-адаптери](app/src/adapters/), [Desktop-адаптери](app/desktop/) |
+| GraphQL API | Node.js, Apollo Server, GraphQL, JWT | Сервер у теці [server-graphql](server-graphql/) |
+| REST API | Node.js, Express | Окремий сервер у теці [server](server/) |
+| База даних | MongoDB, Mongoose | Підключення та моделі серверної частини |
+| Інструменти | Git, GitHub, npm, dotenv | Контроль версій, залежності та конфігурація середовища |
+
+### Архітектура та взаємодія компонентів
+
+```mermaid
+flowchart TB
+  subgraph Platforms["Платформи"]
+    W["Web"]
+    M["Mobile"]
+    D["Desktop"]
+  end
+
+  subgraph Clients["Клієнтські технології"]
+    WC["React + Vite + Apollo Client"]
+    MC["React Native + Expo"]
+    DC["Electron + Web UI"]
+  end
+
+  subgraph Shared["Спільний код та адаптери"]
+    CORE["@dm-system/core"]
+    WA["LocalStorage Adapter"]
+    DA["Desktop Adapter"]
+    IPC["Preload Bridge / IPC"]
+    FS["File Storage Adapter"]
+  end
+
+  subgraph Backend["Серверний рівень"]
+    G["Apollo Server / GraphQL / JWT"]
+    R["Express REST API"]
+  end
+
+  DB[("MongoDB")]
+
+  W --> WC
+  M --> MC
+  D --> DC
+  WC --> CORE
+  CORE --> WA
+  CORE --> DA --> IPC --> FS
+  WC --> G
+  MC -. "може використовувати спільний API; інтеграцію слід перевірити" .-> G
+  G --> DB
+  R --> DB
+```
+
+Спільний пакет `@dm-system/core` надає сервіс зберігання з методами `get`, `set` і `remove`. У Web використовується LocalStorage Adapter. У Desktop операції передаються через preload bridge та IPC до файлового адаптера. Мобільний клієнт має окрему реалізацію зберігання токена; його використання пакета `@dm-system/core` не підтверджене.
+
+GraphQL API є основним API для вебклієнта. Окремий Express REST API також присутній у репозиторії, але його використання основними клієнтами не підтверджене.
+
+### Основні архітектурні рішення
+
+- React використано для побудови компонентного вебінтерфейсу, React Native та Expo — для мобільного клієнта.
+- Electron дає змогу запускати вебінтерфейс у десктопному середовищі та працювати з файловим сховищем через IPC.
+- GraphQL та Apollo Server забезпечують взаємодію вебклієнта із серверною частиною.
+- MongoDB та Mongoose використовуються для зберігання серверних даних.
+- Адаптери ізолюють платформні відмінності локального зберігання: спільний сервіс працює з однаковим набором методів, а реалізація залежить від платформи.
+
+### Основний кросплатформний виклик
+
+Однією з відмінностей між платформами є спосіб локального зберігання. Браузер використовує `localStorage`, тоді як Electron працює з файловою системою через main process та IPC. Для цього створено спільний інтерфейс сховища й окремі адаптери. Завдяки цьому код, який використовує методи `get`, `set` і `remove`, не повинен знати деталі конкретного сховища.
+
+### Набуті компетентності
+
+Під час розробки DM-System були опрацьовані такі навички:
+
+- створення SPA на React та організація компонентної структури;
+- розробка мобільного клієнта на React Native та Expo;
+- створення десктопної оболонки на Electron;
+- побудова REST API та GraphQL API на Node.js;
+- використання MongoDB і Mongoose для роботи з даними;
+- реалізація JWT-авторизації;
+- застосування адаптерів і відокремлення платформозалежного коду від спільного сервісу;
+- робота з npm workspaces, Git і GitHub.
+
+### Приклади реалізації в коді
+
+1. **Спільний сервіс зберігання:** `app/packages/core/src/services/storageService.js`.
+2. **Вибір адаптера залежно від середовища:** `app/src/lib/platformStorage.js`.
+3. **Безпечний міст Electron:** `app/desktop/preload.cjs` та `app/desktop/ipcHandlers.js`.
+4. **GraphQL сервер:** `server-graphql/index.js`, схема та резолвери в теці `server-graphql`.
+
+### Зв'язок із лабораторними роботами
+
+- [Лабораторна 1.1 — порівняння підходів](labs/lab_1.1/).
+- [Лабораторна 1.2 — початковий клієнтський прототип](labs/lab_1.2/).
+- Лабораторна 2 — серверна частина на Node.js, Express і REST API.
+- Лабораторна 3 — GraphQL API на Apollo Server із JWT-автентифікацією.
+- Лабораторна 4 — SPA на React Hooks та Styled Components.
+- Лабораторна 5 — мобільний застосунок на React Native.
+- Лабораторна 6 — десктопний застосунок на Electron.
+- [Лабораторні 7–8 — спільне ядро та monorepo](labs/lab_7-8/).
