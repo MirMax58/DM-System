@@ -224,7 +224,7 @@ flowchart TB
   CORE --> WA
   CORE --> DA --> IPC --> FS
   WC --> G
-  MC -.  .-> G
+  MC -. "API" .-> G
   G --> DB
   R --> DB
 ```
