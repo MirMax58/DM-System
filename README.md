@@ -224,7 +224,7 @@ flowchart TB
   CORE --> WA
   CORE --> DA --> IPC --> FS
   WC --> G
-  MC -. "може використовувати спільний API; інтеграцію слід перевірити" .-> G
+  MC -.  .-> G
   G --> DB
   R --> DB
 ```
